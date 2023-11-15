@@ -1,5 +1,3 @@
-# copyright 2021 Rob Carnell
-
 #' Get all CFPB complaints
 #'
 #' @param quiet Should progress messages be printed?

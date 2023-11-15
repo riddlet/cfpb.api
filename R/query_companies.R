@@ -1,5 +1,3 @@
-# Copyright 2021 Robert Carnell
-
 #' Suggest Possible Companies based on partial match
 #'
 #' API docs:  https://cfpb.github.io/api/ccdb/

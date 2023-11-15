@@ -1,5 +1,3 @@
-# Copyright 2021 Robert Carnell
-
 #' Query For Complaints
 #'
 #' API docs:  https://cfpb.github.io/api/ccdb/
