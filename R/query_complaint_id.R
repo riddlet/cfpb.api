@@ -50,18 +50,24 @@ query_complaint_id <- function(complaintID = NULL)
   if (res$status_code == get_success_code())
   {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
-    res_data <- text_res$hits$hits$`_source`
-    res_data$consumer_disputed <- as.factor(res_data$consumer_disputed)
-    res_data$date_received <- strptime(res_data$date_received, "%Y-%m-%dT%H:%M:%S")
-    res_data$date_sent_to_company <- strptime(res_data$date_sent_to_company, "%Y-%m-%dT%H:%M:%S")
-    res_data$issue <- as.factor(res_data$issue)
-    res_data$product <- as.factor(res_data$product)
-    res_data$state <- as.factor(res_data$state)
-    res_data$sub_issue <- as.factor(res_data$sub_issue)
-    res_data$sub_product <- as.factor(res_data$sub_product)
-    res_data$submitted_via <- as.factor(res_data$submitted_via)
-    res_data$timely <- as.factor(res_data$timely)
-    return(res_data)
+    if (text_res$hits$total$value>0)
+    {
+      res_data <- text_res$hits$hits$`_source`
+      res_data$consumer_disputed <- as.factor(res_data$consumer_disputed)
+      res_data$date_received <- strptime(res_data$date_received, "%Y-%m-%dT%H:%M:%S")
+      res_data$date_sent_to_company <- strptime(res_data$date_sent_to_company, "%Y-%m-%dT%H:%M:%S")
+      res_data$issue <- as.factor(res_data$issue)
+      res_data$product <- as.factor(res_data$product)
+      res_data$state <- as.factor(res_data$state)
+      res_data$sub_issue <- as.factor(res_data$sub_issue)
+      res_data$sub_product <- as.factor(res_data$sub_product)
+      res_data$submitted_via <- as.factor(res_data$submitted_via)
+      res_data$timely <- as.factor(res_data$timely)
+      return(res_data)
+    } else
+    {
+      stop("No complaints found with that ID")
+    }
   } else if (res$status_code == get_invalid_status_value())
   {
     cat(cfpb_query_path, "\n")
