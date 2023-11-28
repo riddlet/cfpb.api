@@ -6,5 +6,5 @@ test_that("query complaints works", {
                            date_received_min = "2021-01-01",
                            date_received_max = "2021-01-05")
   expect_equal(as.Date(min(temp$date_received)), as.Date("2021-01-01"))
-  expect_equal(as.Date(max(temp$date_received)), as.Date("2021-01-04"))
+  expect_equal(as.Date(max(temp$date_received)), as.Date("2021-01-05"))
 })
