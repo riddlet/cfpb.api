@@ -29,3 +29,17 @@ get_success_code <- function(){
 get_invalid_status_value <- function() {
   return(400)
 }
+
+#' Get function arguments, including defaults
+#'
+#' @return arguments
+match.call.defaults <- function(...) {
+  call <- evalq(match.call(expand.dots = FALSE), parent.frame(1))
+  formals <- evalq(formals(), parent.frame(1))
+
+  for(i in setdiff(names(formals), names(call)))
+    call[i] <- list( formals[[i]] )
+
+
+  match.call(sys.function(sys.parent()), call)
+}

@@ -5,7 +5,7 @@
 #' @param search_term (string) Return results containing specific term
 #' @param field (string) If the parameter "search_term" has a value, use "field" to specify which field is searched. If not specified, "complaint_what_happened" will be searched.
 #' @param frm (integer) Return results starting from a specific index, only if format parameter is not specified, ignore otherwise
-#' @param size (integer) Limit the size of the results.  Max limit is 1000
+#' @param size (integer) Limit the size of the results.  Max limit is 10000
 #' @param sort (string) Return results sort in a particular order
 #' @param format (string) Format to be returned, if this parameter is not specified, frm/size parameters can be used properly, but if a format is specified for exporting, frm/size will be ignored
 #' @param no_aggs (boolean) Include aggregations in result or not, True means no aggregations will be included, False means aggregations will be included.
@@ -61,10 +61,8 @@
 #'   query_complaints(size = 1)
 #' }
 #'
-query_complaints <- function(search_term = NULL, field = NULL, frm = NULL,
-                             size = NULL, sort = NULL, format = NULL,
-                             no_aggs = NULL, no_highlight = NULL,
-                             company = NULL, company_public_response = NULL,
+query_complaints <- function(search_term = NULL, field = 'complaint_what_happened', frm = NULL,
+                             size = 1000, company = NULL, company_public_response = NULL,
                              company_received_max = NULL, company_received_min = NULL,
                              company_response = NULL, consumer_consent_provided = NULL,
                              consumer_disputed = NULL, date_received_max = NULL,
@@ -73,21 +71,19 @@ query_complaints <- function(search_term = NULL, field = NULL, frm = NULL,
                              submitted_via = NULL, tags = NULL, timely = NULL,
                              zip_code = NULL)
 {
-  if (!is.null(field) & !is.null(search_term))
+  if (missing(search_term))
   {
-    cat(paste0("Searching for ", search_term, " in ", field, "\n"))
-  } else if (!is.null(field))
-  {
-    cat(paste0("Searching for ", search_term, " in complaint_what_happened\n"))
+    stop('Search term required')
   }
 
-  if (!is.null(format))
-    cat("format is specified, ingoring frm and size\n")
+  if (size > 10000)
+  {
+    warning("Only 10,000 results will be returned")
+  }
 
-  if (size > 1000)
-    warning("Only 1,000 results will be returned")
+  cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
-  cfpb_query_list <- as.list(match.call(expand.dots = FALSE))[-1]
+  cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
   #print(cfpb_query_list)
   #print(lapply(cfpb_query_list, eval))
   #cfpb_query_list <- lapply(cfpb_query_list, eval)
