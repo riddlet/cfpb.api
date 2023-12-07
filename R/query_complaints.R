@@ -84,49 +84,42 @@ query_complaints <- function(search_term = NULL, field = 'complaint_what_happene
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
-  #print(cfpb_query_list)
-  #print(lapply(cfpb_query_list, eval))
-  #cfpb_query_list <- lapply(cfpb_query_list, eval)
   cfpb_query_list <- lapply(cfpb_query_list, eval.parent, n = 2)
   if (page==TRUE){
     query_page(cfpb_query_list)
   } else {
     query_nopage(cfpb_query_list)
   }
-  cfpb_query_list$sort <- 'created_date_desc'
+}
+
+#' Query without paging
+#'
+#' API docs:  https://cfpb.github.io/api/ccdb/
+#'
+query_no_page <- function(cfpb_query_list) {
+
   cfpb_query_path <- httr::modify_url(
     url = get_cfpb_url(),
     path = get_cfpb_url_path(""),
     query = cfpb_query_list
   )
-  #print(cfpb_query_path)
-  res <- httr::GET(cfpb_query_path)
 
-  if (res$status_code == get_success_code())
-  {
+  res <- httr::GET(cfpb_query_path)
+  if (check_response_status(res)) {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     res_data <- to_dataframe(text_res)
-    cat(
-      paste(
-        'Returning',
-        dim(res_data)[1],
-        'complaints of',
-        text_res$hits$total$value,
-        'hits'
-        )
-      )
-    return(res_data)
-  } else if (res$status_code == get_invalid_status_value())
-  {
-    cat(cfpb_query_path, "\n")
-    stop(paste("Invalid status value.  HTTP return code:", res$status_code))
-  } else
-  {
-    cat(cfpb_query_path, "\n")
-    stop(paste("HTTP return code:", res$status_code))
   }
+  cat(
+    paste(
+      'Returning',
+      dim(res_data)[1],
+      'complaints of',
+      text_res$hits$total$value,
+      'hits'
+    )
+  )
+  return(res_data)
 }
-
 
 #' Query with paging
 #'
@@ -142,57 +135,39 @@ query_page <- function(cfpb_query_list){
     query = cfpb_query_list
   )
 
+  #initial request
   res <- httr::GET(cfpb_query_path)
-  if (res$status_code == get_success_code())
-  {
+  if (check_response_status(res)){
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     res_data <- to_dataframe(text_res)
-  } else if (res$status_code == get_invalid_status_value())
-  {
-    cat(cfpb_query_path, "\n")
-    stop(paste("Invalid status value.  HTTP return code:", res$status_code))
-  } else
-  {
-    cat(cfpb_query_path, "\n")
-    stop(paste("HTTP return code:", res$status_code))
   }
-}
+
   total_hits <- text_res$hits$total
   #is paging necessary?
-  if (total_hits > 10000){
+  if (total_hits > 10000) {
     remaining_dat <- TRUE
-    while(remaining_dat == TRUE){
+    while(remaining_dat == TRUE) {
       cfpb_query_list$date_received_max <- min(res_dat$date_received)
       cfpb_query_path <- httr::modify_url(
         url = get_cfpb_url(),
         path = get_cfpb_url_path(""),
         query = cfpb_query_list
       )
+
       res <- httr::GET(cfpb_query_path)
-      if (res$status_code == get_success_code())
-      {
+      if (check_response_status(res)) {
         text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
         tmp_dat <- to_dataframe(text_res)
         res_dat <- rbind(
           res_dat,
           tmp_dat[!tmp_dat$complaint_id %in% res_dat$complaint_id,]
-          )
+        )
         remaining_dat <- ifelse(total_hits > dim(res_dat)[1], TRUE, FALSE)
-      } else if (res$status_code == get_invalid_status_value())
-      {
-        cat(cfpb_query_path, "\n")
-        stop(paste("Invalid status value.  HTTP return code:", res$status_code))
-      } else
-      {
-        cat(cfpb_query_path, "\n")
-        stop(paste("HTTP return code:", res$status_code))
       }
     }
   } else {
     return(res_data)
   }
-
-
 
 }
 
@@ -210,4 +185,19 @@ to_dataframe <- function(text_res){
   res_data$submitted_via <- as.factor(res_data$submitted_via)
   res_data$company_response <- as.factor(res_data$company_response)
   return(res_data)
+}
+
+check_response_status <- function(query_results) {
+  if (res$status_code == get_success_code())
+  {
+    return(TRUE)
+  } else if (res$status_code == get_invalid_status_value())
+  {
+    cat(cfpb_query_path, "\n")
+    stop(paste("Invalid status value.  HTTP return code:", res$status_code))
+  } else
+  {
+    cat(cfpb_query_path, "\n")
+    stop(paste("HTTP return code:", res$status_code))
+  }
 }
