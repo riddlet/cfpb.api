@@ -79,22 +79,26 @@ query_complaints <- function(search_term = NULL, field = 'complaint_what_happene
   if (size > 10000)
   {
     warning("Only 10,000 results will be returned")
+    size <- 10000
   }
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
   cfpb_query_list <- lapply(cfpb_query_list, eval.parent, n = 2)
+  # don't want page as an actual argument to the API, as no such thing exists
+  cfpb_query_list$page <- NULL
   if (page==TRUE){
-    query_page(cfpb_query_list)
+    res_data <- query_page(cfpb_query_list)
   } else {
-    query_nopage(cfpb_query_list)
+    res_data <- query_nopage(cfpb_query_list)
   }
+  return(res_data)
 }
 
 #' Query without paging
 #'
-#' API docs:  https://cfpb.github.io/api/ccdb/
+#' @param cfpb_query_list (list) A list of arguments to be passed in the query URL
 #'
 query_no_page <- function(cfpb_query_list) {
 
@@ -105,7 +109,7 @@ query_no_page <- function(cfpb_query_list) {
   )
 
   res <- httr::GET(cfpb_query_path)
-  if (check_response_status(res)) {
+  if (check_response_status(res, cfpb_query_path)) {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     res_data <- to_dataframe(text_res)
   }
@@ -123,7 +127,7 @@ query_no_page <- function(cfpb_query_list) {
 
 #' Query with paging
 #'
-#' API docs:  https://cfpb.github.io/api/ccdb/
+#' @param cfpb_query_list (list) A list of arguments to be passed in the query URL
 #'
 query_page <- function(cfpb_query_list){
 
@@ -135,34 +139,51 @@ query_page <- function(cfpb_query_list){
     query = cfpb_query_list
   )
 
-  #initial request
+  #initial request ------------------
   res <- httr::GET(cfpb_query_path)
-  if (check_response_status(res)){
+  if (check_response_status(res, cfpb_query_path)){
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     res_data <- to_dataframe(text_res)
   }
 
-  total_hits <- text_res$hits$total
+  total_hits <- text_res$hits$total$value
   #is paging necessary?
   if (total_hits > 10000) {
     remaining_dat <- TRUE
+    n_iterations <- ceiling(total_hits/10000)
+    pb <- utils::txtProgressBar(label = "Accessing Complaint API:", style = 3)
+    i <- 1
+
+
     while(remaining_dat == TRUE) {
-      cfpb_query_list$date_received_max <- min(res_dat$date_received)
+
+      #Using date as a paging mechanism -----------------------------
+      cfpb_query_list$date_received_max <- as.Date(
+        min(res_data$date_received), format="%Y-%m-%d"
+      )
+
+      #construct query -------------------
       cfpb_query_path <- httr::modify_url(
         url = get_cfpb_url(),
         path = get_cfpb_url_path(""),
         query = cfpb_query_list
       )
 
+      #get response ---------------------
       res <- httr::GET(cfpb_query_path)
-      if (check_response_status(res)) {
+      if (check_response_status(res, cfpb_query_path)) {
         text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
         tmp_dat <- to_dataframe(text_res)
-        res_dat <- rbind(
-          res_dat,
-          tmp_dat[!tmp_dat$complaint_id %in% res_dat$complaint_id,]
+
+        #append to dataframe, removing duplicates --------------
+        res_data <- rbind(
+          res_data,
+          tmp_dat[!tmp_dat$complaint_id %in% res_data$complaint_id,]
         )
-        remaining_dat <- ifelse(total_hits > dim(res_dat)[1], TRUE, FALSE)
+        # stop?
+        utils::setTxtProgressBar(pb, i/(n_iterations-1))
+        i <- i+1
+        remaining_dat <- ifelse(total_hits > dim(res_data)[1], TRUE, FALSE)
       }
     }
   } else {
@@ -171,6 +192,10 @@ query_page <- function(cfpb_query_list){
 
 }
 
+#' Construct dataframe from text-ified response
+#'
+#' @param text_res (string) The content of the API response, converted using jsonlite::FromJSON
+#'
 to_dataframe <- function(text_res){
   res_data <- text_res$hits$hits$`_source`
   res_data$consumer_consent_provided <- as.factor(res_data$consumer_consent_provided)
@@ -187,17 +212,20 @@ to_dataframe <- function(text_res){
   return(res_data)
 }
 
-check_response_status <- function(query_results) {
-  if (res$status_code == get_success_code())
+#' Check the API response to be sure it's a-okay
+#'
+#' @param query_results (string) A list of arguments to be passed in the query URL
+check_response_status <- function(query_results, cfpb_query_path) {
+  if (query_results$status_code == get_success_code())
   {
     return(TRUE)
-  } else if (res$status_code == get_invalid_status_value())
+  } else if (query_results$status_code == get_invalid_status_value())
   {
     cat(cfpb_query_path, "\n")
-    stop(paste("Invalid status value.  HTTP return code:", res$status_code))
+    stop(paste("Invalid status value.  HTTP return code:", query_results$status_code))
   } else
   {
     cat(cfpb_query_path, "\n")
-    stop(paste("HTTP return code:", res$status_code))
+    stop(paste("HTTP return code:", query_results$status_code))
   }
 }
