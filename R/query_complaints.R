@@ -4,12 +4,7 @@
 #'
 #' @param search_term (string) Return results containing specific term
 #' @param field (string) If the parameter "search_term" has a value, use "field" to specify which field is searched. If not specified, "complaint_what_happened" will be searched.
-#' @param frm (integer) Return results starting from a specific index, only if format parameter is not specified, ignore otherwise
 #' @param size (integer) Limit the size of the results.  Max limit is 10000
-#' @param sort (string) Return results sort in a particular order
-#' @param format (string) Format to be returned, if this parameter is not specified, frm/size parameters can be used properly, but if a format is specified for exporting, frm/size will be ignored
-#' @param no_aggs (boolean) Include aggregations in result or not, True means no aggregations will be included, False means aggregations will be included.
-#' @param no_highlight (boolean) Include highlight of search term in result or not, True means no highlighting will be included, False means highlighting will be included.
 #' @param company (string array) Filter the results to only return these companies
 #' @param company_public_response (string array) Filter the results to only return these types of public response by the company
 #' @param company_received_max (string) Return results with date < company_received_max (i.e. 2017-03-04)
@@ -61,7 +56,7 @@
 #'   query_complaints(size = 1)
 #' }
 #'
-query_complaints <- function(search_term = NULL, field = 'complaint_what_happened', frm = NULL,
+query_complaints <- function(search_term = NULL, field = 'complaint_what_happened',
                              size = 10000, company = NULL, company_public_response = NULL,
                              company_received_max = NULL, company_received_min = NULL,
                              company_response = NULL, consumer_consent_provided = NULL,
