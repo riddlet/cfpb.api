@@ -97,20 +97,10 @@ query_trends <- function(search_term = NULL, lens = 'overview', trend_interval =
   print(cfpb_query_path)
   res <- httr::GET(cfpb_query_path)
 
-  if (res$status_code == get_success_code())
-  {
-    text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
-  } else if (res$status_code == get_invalid_status_value())
-  {
-    cat(cfpb_query_path, "\n")
-    stop(paste("Invalid status value.  HTTP return code:", res$status_code))
-  } else
-  {
-    cat(cfpb_query_path, "\n")
-    stop(paste("HTTP return code:", res$status_code))
+  if (check_response_status(res, cfpb_query_path)) {
+    outdat <- text_res$aggregations$dateRangeBrush$dateRangeBrush$buckets
+    outdat$timestamp <- outdat$key_as_string
+    outdat <- outdat[,c('timestamp', 'doc_count')]
+    return(outdat)
   }
-  outdat <- text_res$aggregations$dateRangeBrush$dateRangeBrush$buckets
-  outdat$timestamp <- outdat$key_as_string
-  outdat <- outdat[,c('timestamp', 'doc_count')]
-  return(outdat)
 }
