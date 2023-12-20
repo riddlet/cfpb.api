@@ -125,7 +125,7 @@ query_products <- function(search_term = NULL, field = 'complaint_what_happened'
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
-  cfpb_query_list <- as.list(match.call(expand.dots = FALSE))[-1]
+  cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
   cfpb_query_list <- lapply(cfpb_query_list, eval.parent, n = 2)
   cfpb_query_path <- httr::modify_url(
     url = get_cfpb_url(),
