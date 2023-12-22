@@ -4,8 +4,8 @@
 #'
 #' @param search_term (string) Return results containing specific term
 #' @param lens (string) The data lens through which to view complaint trends over time. Available values are overview (default), issue, product, or tags.
-#' @param trend_interval (string) The interval of time to use for trends aggregations histograms. When using day intervals, we recommend querying for date_received_min / max periods of less than one year. Available values: year (default), quarter, month, week, day
-#' @param field (string) If the parameter "search_term" has a value, use "field" to specify which field is searched. If not specified, "complaint_what_happened" will be searched.
+#' @param trend_interval (string) The interval of time to use for aggregations. When using day intervals, we recommend querying for periods of less than one year. Available values: year (default), quarter, month, week, day
+#' @param field (string) If the parameter "search_term" has a value, use "field" to specify which field is searched. Available values: complaint_what_happened (default), company_public_response, all.
 #' @param company (string array) Filter the results to only return these companies
 #' @param company_public_response (string array) Filter the results to only return these types of public response by the company
 #' @param company_received_max (string) Return results with date < company_received_max (i.e. 2017-03-04)
@@ -63,19 +63,13 @@ query_trends <- function(search_term = NULL, lens = 'overview', trend_interval =
                             company_public_response = NULL, company_received_max = NULL,
                             company_received_min = NULL, company_response = NULL,
                             consumer_consent_provided = NULL, consumer_disputed = NULL,
-                            date_received_max = NULL, date_received_min = NULL, focus=NULL,
+                            date_received_max = NULL, date_received_min = NULL,
                             has_narrative = NULL, issue = NULL, product = NULL,
-                            state = NULL, submitted_via = NULL, sub_lens = NULL,
-                            tags = NULL, timely = NULL, trend_depth = NULL, zip_code = NULL)
+                            state = NULL, submitted_via = NULL, tags = NULL,
+                            timely = NULL, trend_depth = NULL, zip_code = NULL)
 {
-  if (missing(search_term))
-  {
-    stop('Search term required')
-  }
-
+  sub_lens <- 'company'
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
-
-  check_lens_args(lens, sub_lens, focus)
 
   cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
   cfpb_query_list <- lapply(cfpb_query_list, eval.parent, n = 2)
@@ -114,7 +108,7 @@ query_trends <- function(search_term = NULL, lens = 'overview', trend_interval =
       outdat <- outdat[,c('product', 'timestamp', 'doc_count')]
       return(outdat)
     } else if (lens=='issue') {
-      outdat_list <- text_res$aggregations$product$product$buckets$trend_period$buckets
+      outdat_list <- text_res$aggregations$issue$issue$buckets$trend_period$buckets
       issues <- text_res$aggregations$issue$issue$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$issue <- rep(issues, sapply(outdat_list, nrow))
@@ -131,17 +125,5 @@ query_trends <- function(search_term = NULL, lens = 'overview', trend_interval =
       return(outdat)
     }
 
-  }
-}
-
-check_lens_args <- function(lens, sub_lens, focus){
-  if (lens=='overview'){
-    return(TRUE)
-  }
-  if (lens=='issue' & all(is.null(sub_lens), is.null(focus))){
-    stop("Either focus or sub_lens is required for lens 'issue'. Valid sub_lens are: 'product', 'sub_issue', 'company', 'tags')")
-  }
-  if (lens=='product' & all(is.null(sub_lens), is.null(focus))){
-    stop("Either focus or sub_lens is required for lens 'product'. Valid sub_lens are: 'sub_product', 'issue', 'company', 'tags')")
   }
 }
