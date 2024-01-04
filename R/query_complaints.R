@@ -4,7 +4,7 @@
 #'
 #' @param search_term (string) Return results containing specific term
 #' @param field (string) If the parameter "search_term" has a value, use "field" to specify which field is searched. If not specified, "complaint_what_happened" will be searched.
-#' @param size (integer) Limit the size of the results.  Max limit is 10000
+#' @param size (integer) Limit the size of the results.
 #' @param company (string array) Filter the results to only return these companies
 #' @param company_public_response (string array) Filter the results to only return these types of public response by the company
 #' @param company_received_max (string) Return results with date < company_received_max (i.e. 2017-03-04)
@@ -21,7 +21,7 @@
 #' @param submitted_via (string array) Filter the results to only return these types of way consumers submitted their complaints
 #' @param tags (string array) Filter the results to only return these types of tag
 #' @param timely (string array) Filter the results to show whether a response was timely
-#' @param zip_code (string array) Zip Code
+#' @param page (boolean) Turn on paging to obtain all results if there are more than ~10,000 hits
 #'
 #' @return A data frame:
 #' \describe{
@@ -66,15 +66,14 @@ query_complaints <- function(search_term = NULL, field = 'complaint_what_happene
                              submitted_via = NULL, tags = NULL, timely = NULL,
                              zip_code = NULL, page=TRUE)
 {
-  if (missing(search_term))
-  {
-    stop('Search term required')
-  }
 
-  if (size > 10000)
-  {
-    warning("Only 10,000 results will be returned")
-    size <- 10000
+  if (!is.na(size))
+    {
+    if (size < 10000 && page==TRUE)
+    {
+      warning("Paging is not needed when querying fewer than 10,000 records")
+      page <- FALSE
+    }
   }
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
@@ -86,7 +85,7 @@ query_complaints <- function(search_term = NULL, field = 'complaint_what_happene
   if (page==TRUE){
     res_data <- query_page(cfpb_query_list)
   } else {
-    res_data <- query_nopage(cfpb_query_list)
+    res_data <- query_no_page(cfpb_query_list)
   }
   return(res_data)
 }
@@ -96,6 +95,17 @@ query_complaints <- function(search_term = NULL, field = 'complaint_what_happene
 #' @param cfpb_query_list (list) A list of arguments to be passed in the query URL
 #'
 query_no_page <- function(cfpb_query_list) {
+
+  if (is.na(cfpb_query_list$size)){
+    warning("Only 10,000 records will be returned if paging is not enabled")
+    cfpb_query_list$size <- 10000
+  }
+  if (cfpb_query_list$size > 10000)
+  {
+    warning("Only 10,000 records will be returned if paging is not enabled")
+    cfpb_query_list$size <- 10000
+  }
+
 
   cfpb_query_path <- httr::modify_url(
     url = get_cfpb_url(),
@@ -114,7 +124,7 @@ query_no_page <- function(cfpb_query_list) {
       dim(res_data)[1],
       'complaints of',
       text_res$hits$total$value,
-      'hits'
+      'hits \n'
     )
   )
   return(res_data)
@@ -127,7 +137,18 @@ query_no_page <- function(cfpb_query_list) {
 query_page <- function(cfpb_query_list){
 
   cfpb_query_list$sort <- 'created_date_desc'
-  cfpb_query_list$size <- 10000
+  if (is.na(cfpb_query_list$size))
+    {
+      cfpb_query_list$size <- 10000
+      requested_size <- Inf
+    } else
+    {
+      requested_size <- cfpb_query_list$size
+      if(cfpb_query_list$size>10000){
+        cfpb_query_list$size <- 10000
+      }
+    }
+
   cfpb_query_path <- httr::modify_url(
     url = get_cfpb_url(),
     path = get_cfpb_url_path(""),
@@ -141,11 +162,17 @@ query_page <- function(cfpb_query_list){
     res_data <- to_dataframe(text_res)
   }
 
-  total_hits <- text_res$hits$total$value
+  if (!is.finite(requested_size))
+  {
+    requested_size <- text_res$hits$total$value
+    total_hits <- text_res$hits$total$value
+  } else {
+    total_hits <- max(c(text_res$hits$total$value, requested_size), na.rm=T)
+  }
   #is paging necessary?
   if (total_hits > 10000) {
     remaining_dat <- TRUE
-    n_iterations <- ceiling(total_hits/10000)
+    n_iterations <- ceiling(requested_size/10000)
     pb <- utils::txtProgressBar(label = "Accessing Complaint API:", style = 3)
     i <- 1
 
@@ -170,18 +197,40 @@ query_page <- function(cfpb_query_list){
         text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
         tmp_dat <- to_dataframe(text_res)
 
+        new_items <- tmp_dat[!tmp_dat$complaint_id %in% res_data$complaint_id,]
+        needed_items <- requested_size - dim(res_data)[1]
+        if (needed_items < dim(new_items)[1]){
+          new_items <- new_items[sample(nrow(new_items), needed_items), ]
+        }
+
         #append to dataframe, removing duplicates --------------
-        res_data <- rbind(
-          res_data,
-          tmp_dat[!tmp_dat$complaint_id %in% res_data$complaint_id,]
-        )
+        res_data <- rbind(res_data, new_items)
         # stop?
         utils::setTxtProgressBar(pb, i/(n_iterations-1))
         i <- i+1
-        remaining_dat <- ifelse(total_hits > dim(res_data)[1], TRUE, FALSE)
+        remaining_dat <- ifelse(requested_size > dim(res_data)[1], TRUE, FALSE)
       }
     }
+    cat(
+      paste(
+        '\nReturning',
+        dim(res_data)[1],
+        'complaints of',
+        total_hits,
+        'hits \n'
+      )
+    )
+    return(res_data)
   } else {
+    cat(
+      paste(
+        'Returning',
+        dim(res_data)[1],
+        'complaints of',
+        total_hits,
+        'hits \n'
+      )
+    )
     return(res_data)
   }
 
