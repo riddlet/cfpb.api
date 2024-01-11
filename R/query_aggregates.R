@@ -45,10 +45,6 @@ query_states <- function(search_term = NULL, field = 'complaint_what_happened',
                          issue = NULL, product = NULL, submitted_via = NULL,
                          tags = NULL, timely = NULL)
 {
-  if (missing(search_term))
-  {
-    stop('Search term required')
-  }
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
@@ -118,10 +114,6 @@ query_products <- function(search_term = NULL, field = 'complaint_what_happened'
                            issue = NULL, state = NULL, submitted_via = NULL,
                            tags = NULL, timely = NULL)
 {
-  if (missing(search_term))
-  {
-    stop('Search term required')
-  }
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
@@ -191,6 +183,7 @@ query_products <- function(search_term = NULL, field = 'complaint_what_happened'
 #'
 #' @importFrom httr modify_url GET content
 #' @importFrom jsonlite fromJSON
+#' @import dplyr
 #'
 #' @examples
 #' \dontrun{
@@ -206,10 +199,6 @@ query_issues <- function(search_term = NULL, field = 'complaint_what_happened',
                            issue = NULL, state = NULL, submitted_via = NULL,
                            tags = NULL, timely = NULL)
 {
-  if (missing(search_term))
-  {
-    stop('Search term required')
-  }
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 

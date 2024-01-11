@@ -4,63 +4,14 @@
 \alias{query_companies}
 \title{Suggest Possible Companies based on partial match}
 \usage{
-query_companies(
-  text,
-  size = NULL,
-  company_public_response = NULL,
-  company_received_max = NULL,
-  company_received_min = NULL,
-  company_response = NULL,
-  consumer_consent_provided = NULL,
-  consumer_disputed = NULL,
-  date_received_max = NULL,
-  date_received_min = NULL,
-  has_narrative = NULL,
-  issue = NULL,
-  product = NULL,
-  state = NULL,
-  submitted_via = NULL,
-  tags = NULL,
-  timely = NULL,
-  zip_code = NULL
-)
+query_companies(text, state = NULL, zip_code = NULL)
 }
 \arguments{
 \item{text}{required (string) text to use for suggestions}
 
-\item{size}{(integer) Limit the size of the results}
+\item{state}{(string array) Filter the results to only return results in these states (use abbreviation, i.e. CA, VA)}
 
-\item{company_public_response}{(string array) Filter the results to only return these types of public response by the company}
-
-\item{company_received_max}{(string) Return results with date < company_received_max (i.e. 2017-03-04)}
-
-\item{company_received_min}{(string) Return results with date >= company_received_min (i.e. 2017-03-04)}
-
-\item{company_response}{(string array) Filter the results to only return these types of response by the company}
-
-\item{consumer_consent_provided}{(string array) Filter the results to only return these types of consent consumer provided}
-
-\item{consumer_disputed}{(string array) Filter the results to only return the specified state of consumer disputed, i.e. yes, no}
-
-\item{date_received_max}{(string) Return results with date < date_received_max (i.e. 2017-03-04)}
-
-\item{date_received_min}{(string) Return results with date >= date_received_min (i.e. 2017-03-04)}
-
-\item{has_narrative}{(string array) Filter the results to only return the specified state of whether it has narrative in the complaint or not, i.e. yes, no}
-
-\item{issue}{(string array) Filter the results to only return these types of issue and subissue, i.e. product-only: Getting a Loan, subproduct needs to include product, separated by '•', Getting a Loan•Cant qualify for a loan}
-
-\item{product}{(string array) Filter the results to only return these types of product and subproduct, i.e. product-only: Mortgage, subproduct needs to include product, separated by '•', Mortgage•FHA mortgage}
-
-\item{state}{(string array) Filter the results to only return these states (use abbreviation, i.e. CA, VA)}
-
-\item{submitted_via}{(string array) Filter the results to only return these types of way consumers submitted their complaints}
-
-\item{tags}{(string array) Filter the results to only return these types of tag}
-
-\item{timely}{(string array) Filter the results to show whether a response was timely}
-
-\item{zip_code}{(string array) Zip Code}
+\item{zip_code}{(string array) Filter the results to only return results in a given zip code}
 }
 \value{
 character vector matching text string

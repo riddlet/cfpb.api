@@ -2,19 +2,18 @@ Package: cfpb.api
 Title: CFPB API for Public Data
 Version: 0.0.1
 Authors@R: 
-    person(given = "Rob",
-           family = "Carnell",
-           role = c("aut", "cre"),
-           email = "bertcarnell@gmail.com")
-Description: A R package that allows users to query Consumer Financial Protection Board data through the web API.
+    person("Rob", "Carnell", , "bertcarnell@gmail.com", role = c("aut", "cre"))
+Description: A R package that allows users to query Consumer Financial
+    Protection Board data through the web API.
 License: MIT + file LICENSE
+Imports:
+    dplyr,
+    httr,
+    jsonlite
+Suggests: 
+    curl,
+    testthat
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
-Imports:
-    jsonlite,
-    httr
-Suggests: 
-    testthat,
-    curl
+RoxygenNote: 7.2.3

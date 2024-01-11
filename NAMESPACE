@@ -2,7 +2,13 @@
 
 export(get_all_complaints)
 export(query_companies)
+export(query_complaint_id)
 export(query_complaints)
+export(query_issues)
+export(query_products)
+export(query_states)
+export(query_trends)
+import(dplyr)
 importFrom(httr,GET)
 importFrom(httr,content)
 importFrom(httr,modify_url)

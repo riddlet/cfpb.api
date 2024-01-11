@@ -3,23 +3,8 @@
 #' API docs:  https://cfpb.github.io/api/ccdb/
 #'
 #' @param text required (string) text to use for suggestions
-#' @param size (integer) Limit the size of the results
-#' @param company_public_response (string array) Filter the results to only return these types of public response by the company
-#' @param company_received_max (string) Return results with date < company_received_max (i.e. 2017-03-04)
-#' @param company_received_min (string) Return results with date >= company_received_min (i.e. 2017-03-04)
-#' @param company_response (string array) Filter the results to only return these types of response by the company
-#' @param consumer_consent_provided (string array) Filter the results to only return these types of consent consumer provided
-#' @param consumer_disputed (string array) Filter the results to only return the specified state of consumer disputed, i.e. yes, no
-#' @param date_received_max (string) Return results with date < date_received_max (i.e. 2017-03-04)
-#' @param date_received_min (string) Return results with date >= date_received_min (i.e. 2017-03-04)
-#' @param has_narrative (string array) Filter the results to only return the specified state of whether it has narrative in the complaint or not, i.e. yes, no
-#' @param issue (string array) Filter the results to only return these types of issue and subissue, i.e. product-only: Getting a Loan, subproduct needs to include product, separated by '•', Getting a Loan•Cant qualify for a loan
-#' @param product (string array) Filter the results to only return these types of product and subproduct, i.e. product-only: Mortgage, subproduct needs to include product, separated by '•', Mortgage•FHA mortgage
-#' @param state (string array) Filter the results to only return these states (use abbreviation, i.e. CA, VA)
-#' @param submitted_via (string array) Filter the results to only return these types of way consumers submitted their complaints
-#' @param tags (string array) Filter the results to only return these types of tag
-#' @param timely (string array) Filter the results to show whether a response was timely
-#' @param zip_code (string array) Zip Code
+#' @param state (string array) Filter the results to only return results in these states (use abbreviation, i.e. CA, VA)
+#' @param zip_code (string array) Filter the results to only return results in a given zip code
 #'
 #' @return character vector matching text string
 #' @export
@@ -31,14 +16,7 @@
 #' \dontrun{
 #'   query_companies(text = "chase")
 #'}
-query_companies <- function(text, size = NULL, company_public_response = NULL,
-                            company_received_max = NULL, company_received_min = NULL,
-                            company_response = NULL, consumer_consent_provided = NULL,
-                            consumer_disputed = NULL, date_received_max = NULL,
-                            date_received_min = NULL, has_narrative = NULL,
-                            issue = NULL, product = NULL, state = NULL,
-                            submitted_via = NULL, tags = NULL, timely = NULL,
-                            zip_code = NULL)
+query_companies <- function(text, state = NULL, zip_code = NULL)
 {
   if (length(text) > 1 || any(is.na(text)) || !all(is.character(text)))
   {
