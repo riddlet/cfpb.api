@@ -9,19 +9,18 @@
 #' @param company_public_response (string array) Filter the results to only return these types of public response by the company
 #' @param company_received_max (string) Return results with date < company_received_max (i.e. 2017-03-04)
 #' @param company_received_min (string) Return results with date >= company_received_min (i.e. 2017-03-04)
-#' @param company_response (string array) Filter the results to only return these types of response by the company
-#' @param consumer_consent_provided (string array) Filter the results to only return these types of consent consumer provided
-#' @param consumer_disputed (string array) Filter the results to only return the specified state of consumer disputed, i.e. yes, no
+#' @param company_response (string array) Filter the results to only return these types of response by the company. Available strings are 'Closed', 'Closed with explanation', 'Closed with monetary relief', 'Closed with non-monetary relief', 'Closed with relief', 'Closed without relief', 'In progress', or 'Untimely response'.
+#' @param consumer_consent_provided (string array) Filter the results to only return these types of consent consumer provided. Available strings are 'Consent not provided', 'Consent provided', 'Consent withdrawn', 'N/A', or 'Other'.
+#' @param consumer_disputed (string array) Filter the results to only return the specified state of consumer disputed. Available values are 'Yes', 'No', or 'N/A'.
 #' @param date_received_max (string) Return results with date < date_received_max (i.e. 2017-03-04)
 #' @param date_received_min (string) Return results with date >= date_received_min (i.e. 2017-03-04)
-#' @param has_narrative (string array) Filter the results to only return the specified state of whether it has narrative in the complaint or not, i.e. yes, no
+#' @param has_narrative (string array) Filter the results to only return the specified state of whether it has narrative in the complaint or not. Available values are 'true', or 'false'.
 #' @param issue (string array) Filter the results to only return these types of issue and subissue, i.e. product-only: Getting a Loan, subproduct needs to include product, separated by '•', Getting a Loan•Cant qualify for a loan
 #' @param product (string array) Filter the results to only return these types of product and subproduct, i.e. product-only: Mortgage, subproduct needs to include product, separated by '•', Mortgage•FHA mortgage
 #' @param state (string array) Filter the results to only return these states (use abbreviation, i.e. CA, VA)
-#' @param submitted_via (string array) Filter the results to only return these types of way consumers submitted their complaints
-#' @param tags (string array) Filter the results to only return these types of tag
-#' @param timely (string array) Filter the results to show whether a response was timely
-#' @param page (boolean) Turn on paging to obtain all results if there are more than ~10,000 hits
+#' @param submitted_via (string array) Filter the results to only return these types of way consumers submitted their complaints. Available values are 'Fax', 'Phone', 'Postal mail', 'Referral', 'Web', or 'Web Referral'.
+#' @param tags (string array) Filter the results to only return these types of tag. Available tags are 'Older American', 'Servicemember', and 'Older American, Servicemember'.
+#' @param timely (string array) Filter the results to show whether a response was timely. Available values are 'Yes', or 'No'.
 #'
 #' @return A data frame:
 #' \describe{
@@ -64,7 +63,7 @@ query_complaints <- function(search_term = NULL, field = 'complaint_what_happene
                              date_received_min = NULL, has_narrative = NULL,
                              issue = NULL, product = NULL, state = NULL,
                              submitted_via = NULL, tags = NULL, timely = NULL,
-                             zip_code = NULL, page=TRUE)
+                             zip_code = NULL)
 {
 
   if (!is.na(size))

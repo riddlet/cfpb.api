@@ -37,27 +37,27 @@ query_products(
 
 \item{company_received_min}{(string) Return results with date >= company_received_min (i.e. 2017-03-04)}
 
-\item{company_response}{(string array) Filter the results to only return these types of response by the company}
+\item{company_response}{(string array) Filter the results to only return these types of response by the company. Available strings are 'Closed', 'Closed with explanation', 'Closed with monetary relief', 'Closed with non-monetary relief', 'Closed with relief', 'Closed without relief', 'In progress', or 'Untimely response'.}
 
-\item{consumer_consent_provided}{(string array) Filter the results to only return these types of consent consumer provided}
+\item{consumer_consent_provided}{(string array) Filter the results to only return these types of consent consumer provided. Available strings are 'Consent not provided', 'Consent provided', 'Consent withdrawn', 'N/A', or 'Other'.}
 
-\item{consumer_disputed}{(string array) Filter the results to only return the specified state of consumer disputed, i.e. yes, no}
+\item{consumer_disputed}{(string array) Filter the results to only return the specified state of consumer disputed. Available strings are 'No', 'Yes', or 'N/A'.}
 
 \item{date_received_max}{(string) Return results with date < date_received_max (i.e. 2017-03-04)}
 
 \item{date_received_min}{(string) Return results with date >= date_received_min (i.e. 2017-03-04)}
 
-\item{has_narrative}{(string array) Filter the results to only return the specified state of whether it has narrative in the complaint or not, i.e. yes, no}
+\item{has_narrative}{(string array) Filter the results to only return the specified state of whether it has narrative in the complaint or not. Available values are 'true', or 'false'.}
 
 \item{issue}{(string array) Filter the results to only return these types of issue and subissue, i.e. product-only: Getting a Loan, subproduct needs to include product, separated by '•', Getting a Loan•Cant qualify for a loan}
 
 \item{state}{(string array) Filter the results to only return these states (use abbreviation, i.e. CA, VA)}
 
-\item{submitted_via}{(string array) Filter the results to only return these types of way consumers submitted their complaints}
+\item{submitted_via}{(string array) Filter the results to only return these types of way consumers submitted their complaints. Available values are 'Fax', 'Phone', 'Postal mail', 'Referral', 'Web', or 'Web Referral'.}
 
-\item{tags}{(string array) Filter the results to only return these types of tag}
+\item{tags}{(string array) Filter the results to only return these types of tag. Available tags are 'Older American', 'Servicemember', and 'Older American, Servicemember'.}
 
-\item{timely}{(string array) Filter the results to show whether a response was timely}
+\item{timely}{(string array) Filter the results to show whether a response was timely. Available values are 'Yes', or 'No'.}
 }
 \value{
 A data frame:

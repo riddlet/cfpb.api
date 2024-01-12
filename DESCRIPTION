@@ -1,10 +1,12 @@
 Package: cfpb.api
 Title: CFPB API for Public Data
 Version: 0.0.1
-Authors@R: 
-    person("Rob", "Carnell", , "bertcarnell@gmail.com", role = c("aut", "cre"))
-Description: A R package that allows users to query Consumer Financial
-    Protection Board data through the web API.
+Authors@R: c(
+    person("Travis", "Riddle", email="travis.riddle@cfpb.gov", role=c("aut", "cre")),
+    person("Lewis", "Kirvan", email="lewis.kirvan@cfpb.gov", role="aut"),
+    person("Rob", "Carnell", email="bertcarnell@gmail.com", role = "ctb"))
+Description: A R package that allows users to query the Consumer Financial
+    Protection Bureau's complain data through the web API.
 License: MIT + file LICENSE
 Imports:
     dplyr,

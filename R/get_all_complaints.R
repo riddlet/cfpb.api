@@ -32,7 +32,7 @@
 #' \dontrun{
 #'   test <- get_all_complaints()
 #' }
-get_all_complaints <- function(quiet = TRUE, file = NA)
+get_all_complaints <- function(quiet = TRUE)
 {
   temp_dir <- tempdir()
   cfpb_download_url <- "http://files.consumerfinance.gov/ccdb/complaints.csv.zip"
