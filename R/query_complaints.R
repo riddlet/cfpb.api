@@ -56,7 +56,7 @@
 #' }
 #'
 query_complaints <- function(search_term = NULL, field = "complaint_what_happened",
-                             size = 10000, company = NULL, company_public_response = NULL,
+                             size = NA, company = NULL, company_public_response = NULL,
                              company_received_max = NULL, company_received_min = NULL,
                              company_response = NULL, consumer_consent_provided = NULL,
                              consumer_disputed = NULL, date_received_max = NULL,
@@ -64,62 +64,13 @@ query_complaints <- function(search_term = NULL, field = "complaint_what_happene
                              issue = NULL, product = NULL, state = NULL,
                              submitted_via = NULL, tags = NULL, timely = NULL,
                              zip_code = NULL) {
-  if (!is.na(size)) {
-    if (size < 10000 && page == TRUE) {
-      warning("Paging is not needed when querying fewer than 10,000 records")
-      page <- FALSE
-    }
-  }
+
 
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
   cfpb_query_list <- lapply(cfpb_query_list, eval.parent, n = 2)
-  # don't want page as an actual argument to the API, as no such thing exists
-  cfpb_query_list$page <- NULL
-  if (page == TRUE) {
-    res_data <- query_page(cfpb_query_list)
-  } else {
-    res_data <- query_no_page(cfpb_query_list)
-  }
-  return(res_data)
-}
-
-#' Query without paging
-#'
-#' @param cfpb_query_list (list) A list of arguments to be passed in the query URL
-#'
-query_no_page <- function(cfpb_query_list) {
-  if (is.na(cfpb_query_list$size)) {
-    warning("Only 10,000 records will be returned if paging is not enabled")
-    cfpb_query_list$size <- 10000
-  }
-  if (cfpb_query_list$size > 10000) {
-    warning("Only 10,000 records will be returned if paging is not enabled")
-    cfpb_query_list$size <- 10000
-  }
-
-
-  cfpb_query_path <- httr::modify_url(
-    url = get_cfpb_url(),
-    path = get_cfpb_url_path(""),
-    query = cfpb_query_list
-  )
-
-  res <- httr::GET(cfpb_query_path)
-  if (check_response_status(res, cfpb_query_path)) {
-    text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
-    res_data <- to_dataframe(text_res)
-  }
-  cat(
-    paste(
-      "Returning",
-      dim(res_data)[1],
-      "complaints of",
-      text_res$hits$total$value,
-      "hits \n"
-    )
-  )
+  res_data <- query_page(cfpb_query_list)
   return(res_data)
 }
 
