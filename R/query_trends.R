@@ -29,7 +29,7 @@
 #' \describe{
 #'   \item{\code{timestamp}}{string}
 #'   \item{\code{doc_count}}{Number of complaints returned from the search}
-#'}
+#' }
 #'
 #' @export
 #'
@@ -38,34 +38,31 @@
 #'
 #' @examples
 #' \dontrun{
-#'   query_complaints(size = 1)
+#' query_complaints(size = 1)
 #' }
 #'
-query_trends <- function(search_term = NULL, lens = 'overview', trend_interval = 'year',
-                            field = 'complaint_what_happened', company = NULL,
-                            company_public_response = NULL, company_received_max = NULL,
-                            company_received_min = NULL, company_response = NULL,
-                            consumer_consent_provided = NULL, consumer_disputed = NULL,
-                            date_received_max = NULL, date_received_min = NULL,
-                            has_narrative = NULL, issue = NULL, product = NULL,
-                            state = NULL, submitted_via = NULL, tags = NULL,
-                            timely = NULL, trend_depth = 10, zip_code = NULL)
-{
+query_trends <- function(search_term = NULL, lens = "overview", trend_interval = "year",
+                         field = "complaint_what_happened", company = NULL,
+                         company_public_response = NULL, company_received_max = NULL,
+                         company_received_min = NULL, company_response = NULL,
+                         consumer_consent_provided = NULL, consumer_disputed = NULL,
+                         date_received_max = NULL, date_received_min = NULL,
+                         has_narrative = NULL, issue = NULL, product = NULL,
+                         state = NULL, submitted_via = NULL, tags = NULL,
+                         timely = NULL, trend_depth = 10, zip_code = NULL) {
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
   cfpb_query_list <- lapply(cfpb_query_list, eval.parent, n = 2)
-  cfpb_query_list$sub_lens <- 'company'
+  cfpb_query_list$sub_lens <- "company"
 
-  if (is.null(cfpb_query_list$lens))
-  {
-    cfpb_query_list$lens <- 'overview'
+  if (is.null(cfpb_query_list$lens)) {
+    cfpb_query_list$lens <- "overview"
   }
-  if (is.null(cfpb_query_list$trend_interval))
-  {
-    cfpb_query_list$trend_interval <- 'year'
+  if (is.null(cfpb_query_list$trend_interval)) {
+    cfpb_query_list$trend_interval <- "year"
   }
-  #print(cfpb_query_list)
+  # print(cfpb_query_list)
 
   cfpb_query_path <- httr::modify_url(
     url = get_cfpb_url(),
@@ -76,36 +73,35 @@ query_trends <- function(search_term = NULL, lens = 'overview', trend_interval =
 
   if (check_response_status(res, cfpb_query_path)) {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
-    if (lens=='overview'){
+    if (lens == "overview") {
       outdat <- text_res$aggregations$dateRangeBrush$dateRangeBrush$buckets
       outdat$timestamp <- outdat$key_as_string
-      outdat <- outdat[,c('timestamp', 'doc_count')]
+      outdat <- outdat[, c("timestamp", "doc_count")]
       return(outdat)
-    } else if (lens=='product'){
+    } else if (lens == "product") {
       outdat_list <- text_res$aggregations$product$product$buckets$trend_period$buckets
       products <- text_res$aggregations$product$product$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$product <- rep(products, sapply(outdat_list, nrow))
       outdat$timestamp <- outdat$key_as_string
-      outdat <- outdat[,c('product', 'timestamp', 'doc_count')]
+      outdat <- outdat[, c("product", "timestamp", "doc_count")]
       return(outdat)
-    } else if (lens=='issue') {
+    } else if (lens == "issue") {
       outdat_list <- text_res$aggregations$issue$issue$buckets$trend_period$buckets
       issues <- text_res$aggregations$issue$issue$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$issue <- rep(issues, sapply(outdat_list, nrow))
       outdat$timestamp <- outdat$key_as_string
-      outdat <- outdat[,c('issue', 'timestamp', 'doc_count')]
+      outdat <- outdat[, c("issue", "timestamp", "doc_count")]
       return(outdat)
-    } else if (lens=='tags'){
+    } else if (lens == "tags") {
       outdat_list <- text_res$aggregations$tags$tags$buckets$trend_period$buckets
       tags <- text_res$aggregations$tags$tags$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$tag <- rep(tags, sapply(outdat_list, nrow))
       outdat$timestamp <- outdat$key_as_string
-      outdat <- outdat[,c('tag', 'timestamp', 'doc_count')]
+      outdat <- outdat[, c("tag", "timestamp", "doc_count")]
       return(outdat)
     }
-
   }
 }

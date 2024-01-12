@@ -25,7 +25,7 @@
 #'   \item{\code{consumer_disputed}}{factor Whether the consumer disputed the company’s response}
 #'   \item{\code{company_public_response}}{string The company's optional, public-facing response to a consumer's complaint}
 #'   \item{\code{sub_issue}}{factor The sub-issue the consumer identified in the complaint}
-#'}
+#' }
 #'
 #' @export
 #'
@@ -34,12 +34,11 @@
 #'
 #' @examples
 #' \dontrun{
-#'   query_complaints(size = 1)
+#' query_complaints(size = 1)
 #' }
 #'
-query_complaint_id <- function(complaintID = NULL)
-{
-    cat(paste0("Searching for ", complaintID, "\n"))
+query_complaint_id <- function(complaintID = NULL) {
+  cat(paste0("Searching for ", complaintID, "\n"))
 
 
   cfpb_query_path <- httr::modify_url(
@@ -48,17 +47,17 @@ query_complaint_id <- function(complaintID = NULL)
   )
   res <- httr::GET(cfpb_query_path)
 
-  if (res$status_code == get_success_code())
-  {
+  if (res$status_code == get_success_code()) {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
-    if (text_res$hits$total$value>0)
-    {
+    if (text_res$hits$total$value > 0) {
       res_data <- text_res$hits$hits$`_source`
-      res_data <- res_data[,!names(res_data) %in% c(':updated_at',
-                                                    'date_received_formatted',
-                                                    'date_sent_to_company_formatted',
-                                                    'date_indexed',
-                                                    'date_indexed_formatted')]
+      res_data <- res_data[, !names(res_data) %in% c(
+        ":updated_at",
+        "date_received_formatted",
+        "date_sent_to_company_formatted",
+        "date_indexed",
+        "date_indexed_formatted"
+      )]
       res_data$consumer_disputed <- as.factor(res_data$consumer_disputed)
       res_data$date_received <- strptime(res_data$date_received, "%Y-%m-%dT%H:%M:%S")
       res_data$date_sent_to_company <- strptime(res_data$date_sent_to_company, "%Y-%m-%dT%H:%M:%S")
@@ -70,16 +69,13 @@ query_complaint_id <- function(complaintID = NULL)
       res_data$submitted_via <- as.factor(res_data$submitted_via)
       res_data$timely <- as.factor(res_data$timely)
       return(res_data)
-    } else
-    {
+    } else {
       stop("No complaints found with that ID")
     }
-  } else if (res$status_code == get_invalid_status_value())
-  {
+  } else if (res$status_code == get_invalid_status_value()) {
     cat(cfpb_query_path, "\n")
     stop(paste("Invalid status value.  HTTP return code:", res$status_code))
-  } else
-  {
+  } else {
     cat(cfpb_query_path, "\n")
     stop(paste("HTTP return code:", res$status_code))
   }

@@ -24,7 +24,7 @@
 #' \describe{
 #'   \item{\code{state}}{string}
 #'   \item{\code{doc_count}}{Number of complaints returned from the search}
-#'}
+#' }
 #'
 #' @export
 #'
@@ -33,19 +33,17 @@
 #'
 #' @examples
 #' \dontrun{
-#'   query_complaints(size = 1)
+#' query_complaints(size = 1)
 #' }
 #'
-query_states <- function(search_term = NULL, field = 'complaint_what_happened',
+query_states <- function(search_term = NULL, field = "complaint_what_happened",
                          company = NULL, company_public_response = NULL,
                          company_received_max = NULL, company_received_min = NULL,
                          company_response = NULL, consumer_consent_provided = NULL,
                          consumer_disputed = NULL, date_received_max = NULL,
                          date_received_min = NULL, has_narrative = NULL,
                          issue = NULL, product = NULL, submitted_via = NULL,
-                         tags = NULL, timely = NULL)
-{
-
+                         tags = NULL, timely = NULL) {
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call(expand.dots = FALSE))[-1]
@@ -54,15 +52,15 @@ query_states <- function(search_term = NULL, field = 'complaint_what_happened',
     url = get_cfpb_url(),
     path = get_cfpb_url_path("geo/states"),
     query = cfpb_query_list
-    )
+  )
   res <- httr::GET(cfpb_query_path)
-  if (check_response_status(res, cfpb_query_path)){
+  if (check_response_status(res, cfpb_query_path)) {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     outdat <- data.frame(
       state = text_res$aggregations$state$state$buckets$key,
       doc_count = text_res$aggregations$state$state$buckets$doc_count
-      )
-    }
+    )
+  }
   return(outdat)
 }
 
@@ -93,7 +91,7 @@ query_states <- function(search_term = NULL, field = 'complaint_what_happened',
 #'   \item{\code{product}}{string}
 #'   \item{\code{subproduct}}{string}
 #'   \item{\code{doc_count}}{Number of complaints returned from the search}
-#'}
+#' }
 #'
 #' @export
 #'
@@ -102,19 +100,17 @@ query_states <- function(search_term = NULL, field = 'complaint_what_happened',
 #'
 #' @examples
 #' \dontrun{
-#'   query_complaints(size = 1)
+#' query_complaints(size = 1)
 #' }
 #'
-query_products <- function(search_term = NULL, field = 'complaint_what_happened',
+query_products <- function(search_term = NULL, field = "complaint_what_happened",
                            company = NULL, company_public_response = NULL,
                            company_received_max = NULL, company_received_min = NULL,
                            company_response = NULL, consumer_consent_provided = NULL,
                            consumer_disputed = NULL, date_received_max = NULL,
                            date_received_min = NULL, has_narrative = NULL,
                            issue = NULL, state = NULL, submitted_via = NULL,
-                           tags = NULL, timely = NULL)
-{
-
+                           tags = NULL, timely = NULL) {
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call.defaults(expand.dots = FALSE))[-1]
@@ -133,12 +129,12 @@ query_products <- function(search_term = NULL, field = 'complaint_what_happened'
     outdat <- dplyr::bind_rows(sub_prod_list)
     outdat$product <- rep(products, sapply(sub_prod_list, nrow))
     outdat$subproduct <- outdat$key
-    outdat <- outdat[,c('product', 'subproduct', 'doc_count')]
+    outdat <- outdat[, c("product", "subproduct", "doc_count")]
     missing_prods <- text_res$aggregations$product$product$buckets
-    missing_prods <- missing_prods[!missing_prods$key %in% outdat$product,]
+    missing_prods <- missing_prods[!missing_prods$key %in% outdat$product, ]
     missing_prods$product <- missing_prods$key
     missing_prods$subproduct <- missing_prods$key
-    missing_prods <- missing_prods[,c('product', 'subproduct', 'doc_count')]
+    missing_prods <- missing_prods[, c("product", "subproduct", "doc_count")]
     outdat <- rbind(outdat, missing_prods)
     outdat %>%
       group_by(product) %>%
@@ -177,7 +173,7 @@ query_products <- function(search_term = NULL, field = 'complaint_what_happened'
 #'   \item{\code{issue}}{string}
 #'   \item{\code{subissue}}{string}
 #'   \item{\code{doc_count}}{Number of complaints returned from the search}
-#'}
+#' }
 #'
 #' @export
 #'
@@ -187,19 +183,17 @@ query_products <- function(search_term = NULL, field = 'complaint_what_happened'
 #'
 #' @examples
 #' \dontrun{
-#'   query_complaints(size = 1)
+#' query_complaints(size = 1)
 #' }
 #'
-query_issues <- function(search_term = NULL, field = 'complaint_what_happened',
-                           company = NULL, company_public_response = NULL,
-                           company_received_max = NULL, company_received_min = NULL,
-                           company_response = NULL, consumer_consent_provided = NULL,
-                           consumer_disputed = NULL, date_received_max = NULL,
-                           date_received_min = NULL, has_narrative = NULL,
-                           issue = NULL, state = NULL, submitted_via = NULL,
-                           tags = NULL, timely = NULL)
-{
-
+query_issues <- function(search_term = NULL, field = "complaint_what_happened",
+                         company = NULL, company_public_response = NULL,
+                         company_received_max = NULL, company_received_min = NULL,
+                         company_response = NULL, consumer_consent_provided = NULL,
+                         consumer_disputed = NULL, date_received_max = NULL,
+                         date_received_min = NULL, has_narrative = NULL,
+                         issue = NULL, state = NULL, submitted_via = NULL,
+                         tags = NULL, timely = NULL) {
   cat(paste0("Searching for '", search_term, "' in ", field, "\n"))
 
   cfpb_query_list <- as.list(match.call(expand.dots = FALSE))[-1]
@@ -218,12 +212,12 @@ query_issues <- function(search_term = NULL, field = 'complaint_what_happened',
     outdat <- dplyr::bind_rows(subissues)
     outdat$issue <- rep(issues, sapply(subissues, nrow))
     outdat$subissue <- outdat$key
-    outdat <- outdat[,c('issue', 'subissue', 'doc_count')]
+    outdat <- outdat[, c("issue", "subissue", "doc_count")]
     missing_issues <- text_res$aggregations$issue$issue$buckets
-    missing_issues <- missing_issues[!missing_issues$key %in% outdat$issue,]
+    missing_issues <- missing_issues[!missing_issues$key %in% outdat$issue, ]
     missing_issues$issue <- missing_issues$key
     missing_issues$subissue <- missing_issues$key
-    missing_issues <- missing_issues[,c('issue', 'subissue', 'doc_count')]
+    missing_issues <- missing_issues[, c("issue", "subissue", "doc_count")]
     outdat <- rbind(outdat, missing_issues)
     outdat %>%
       group_by(issue) %>%

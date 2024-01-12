@@ -14,12 +14,10 @@
 #'
 #' @examples
 #' \dontrun{
-#'   query_companies(text = "chase")
-#'}
-query_companies <- function(text, state = NULL, zip_code = NULL)
-{
-  if (length(text) > 1 || any(is.na(text)) || !all(is.character(text)))
-  {
+#' query_companies(text = "chase")
+#' }
+query_companies <- function(text, state = NULL, zip_code = NULL) {
+  if (length(text) > 1 || any(is.na(text)) || !all(is.character(text))) {
     stop("text must be a character vector of length 1")
   }
   cfpb_query_list <- as.list(match.call(expand.dots = FALSE))[-1]
@@ -30,16 +28,12 @@ query_companies <- function(text, state = NULL, zip_code = NULL)
   )
   res <- httr::GET(cfpb_query_path)
 
-  if (res$status_code == get_success_code())
-  {
+  if (res$status_code == get_success_code()) {
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     return(text_res)
-  } else if (res$status_code == get_invalid_status_value())
-  {
+  } else if (res$status_code == get_invalid_status_value()) {
     stop(paste("Invalid status value.  HTTP return code:", res$status_code))
-  } else
-  {
+  } else {
     stop(paste("HTTP return code:", res$status_code))
   }
 }
-

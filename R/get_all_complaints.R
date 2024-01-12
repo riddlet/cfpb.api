@@ -23,31 +23,32 @@
 #'   \item{\code{consumer_disputed}}{factor Whether the consumer disputed the company’s response}
 #'   \item{\code{company_public_response}}{string The company's optional, public-facing response to a consumer's complaint}
 #'   \item{\code{sub_issue}}{factor The sub-issue the consumer identified in the complaint}
-#'}
+#' }
 #' @export
 #'
 #' @importFrom utils download.file unzip read.csv
 #'
 #' @examples
 #' \dontrun{
-#'   test <- get_all_complaints()
+#' test <- get_all_complaints()
 #' }
-get_all_complaints <- function(quiet = TRUE)
-{
+get_all_complaints <- function(quiet = TRUE) {
   temp_dir <- tempdir()
   cfpb_download_url <- "http://files.consumerfinance.gov/ccdb/complaints.csv.zip"
   download_file <- file.path(temp_dir, "complaints.csv.zip")
   csv_file <- file.path(temp_dir, "complaints.csv")
 
-  if (!quiet){
+  if (!quiet) {
     cat("Downloading...\n")
   }
-  utils::download.file(url = cfpb_download_url, destfile = download_file,
-                       quiet = quiet)
-  if (!quiet){
+  utils::download.file(
+    url = cfpb_download_url, destfile = download_file,
+    quiet = quiet
+  )
+  if (!quiet) {
     cat("Unzipping...\n")
   }
-  utils::unzip(zipfile = download_file, exdir = temp_dir,)
+  utils::unzip(zipfile = download_file, exdir = temp_dir, )
   if (!quiet) {
     cat("Reading CSV...\n")
   }
@@ -55,15 +56,17 @@ get_all_complaints <- function(quiet = TRUE)
   unlink(download_file)
   unlink(csv_file)
 
-  if (!quiet){
+  if (!quiet) {
     cat("Transforming CSV...\n")
   }
-  names(X) <- c("date_received", "product", "sub_product",
-                "issue", "sub_issue", "complaint_what_happened",
-                "company_public_response", "company", "state",
-                "zip_code", "tags", "consumer_consent_provided",
-                "submitted_via", "date_sent_to_company",
-                "company_response", "timely", "consumer_disputed", "complaint_id")
+  names(X) <- c(
+    "date_received", "product", "sub_product",
+    "issue", "sub_issue", "complaint_what_happened",
+    "company_public_response", "company", "state",
+    "zip_code", "tags", "consumer_consent_provided",
+    "submitted_via", "date_sent_to_company",
+    "company_response", "timely", "consumer_disputed", "complaint_id"
+  )
   X$date_received <- strptime(X$date_received, "%Y-%m-%dT%H:%M:%S")
   X$product <- as.factor(X$product)
   X$sub_product <- as.factor(X$sub_product)
@@ -78,11 +81,13 @@ get_all_complaints <- function(quiet = TRUE)
   X$timely <- as.factor(X$timely)
   X$consumer_disputed <- as.factor(X$consumer_disputed)
   X$has_narrative <- ifelse(X$complaint_what_happened == "", FALSE, TRUE)
-  X <- X[, c('product', 'complaint_what_happened', 'date_sent_to_company',
-             'issue', 'sub_product', 'zip_code', 'tags', 'has_narrative',
-             'complaint_id', 'timely', 'consumer_consent_provided',
-             'company_response', 'submitted_via', 'company', 'date_received',
-             'state', 'consumer_disputed', 'company_public_response',
-             'sub_issue')]
+  X <- X[, c(
+    "product", "complaint_what_happened", "date_sent_to_company",
+    "issue", "sub_product", "zip_code", "tags", "has_narrative",
+    "complaint_id", "timely", "consumer_consent_provided",
+    "company_response", "submitted_via", "company", "date_received",
+    "state", "consumer_disputed", "company_public_response",
+    "sub_issue"
+  )]
   return(X)
 }
