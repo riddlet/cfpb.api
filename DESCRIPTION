@@ -1,5 +1,5 @@
 Package: cfpb.api
-Title: CFPB API for Public Data
+Title: CFPB API for Public Complaint Data
 Version: 0.0.1
 Authors@R: c(
     person("Travis", "Riddle", email="travis.riddle@cfpb.gov", role=c("aut", "cre")),
