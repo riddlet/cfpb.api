@@ -14,9 +14,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' query_companies(text = "chase")
+#' find_company_name(text = "chase")
 #' }
-query_companies <- function(text, state = NULL, zip_code = NULL) {
+find_company_name <- function(text, state = NULL, zip_code = NULL) {
   if (length(text) > 1 || any(is.na(text)) || !all(is.character(text))) {
     stop("text must be a character vector of length 1")
   }

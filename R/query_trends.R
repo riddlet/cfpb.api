@@ -75,7 +75,9 @@ query_trends <- function(search_term = NULL, lens = "overview", trend_interval =
     text_res <- jsonlite::fromJSON(httr::content(res, "text", encoding = "UTF-8"))
     if (lens == "overview") {
       outdat <- text_res$aggregations$dateRangeBrush$dateRangeBrush$buckets
-      outdat$timestamp <- outdat$key_as_string
+      outdat$timestamp <- convert_timestamps(
+        outdat$key_as_string, cfpb_query_list$trend_interval
+        )
       outdat <- outdat[, c("timestamp", "doc_count")]
       return(outdat)
     } else if (lens == "product") {
@@ -83,7 +85,9 @@ query_trends <- function(search_term = NULL, lens = "overview", trend_interval =
       products <- text_res$aggregations$product$product$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$product <- rep(products, sapply(outdat_list, nrow))
-      outdat$timestamp <- outdat$key_as_string
+      outdat$timestamp <- convert_timestamps(
+        outdat$key_as_string, cfpb_query_list$trend_interval
+      )
       outdat <- outdat[, c("product", "timestamp", "doc_count")]
       return(outdat)
     } else if (lens == "issue") {
@@ -91,7 +95,9 @@ query_trends <- function(search_term = NULL, lens = "overview", trend_interval =
       issues <- text_res$aggregations$issue$issue$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$issue <- rep(issues, sapply(outdat_list, nrow))
-      outdat$timestamp <- outdat$key_as_string
+      outdat$timestamp <- convert_timestamps(
+        outdat$key_as_string, cfpb_query_list$trend_interval
+      )
       outdat <- outdat[, c("issue", "timestamp", "doc_count")]
       return(outdat)
     } else if (lens == "tags") {
@@ -99,7 +105,9 @@ query_trends <- function(search_term = NULL, lens = "overview", trend_interval =
       tags <- text_res$aggregations$tags$tags$buckets$key
       outdat <- dplyr::bind_rows(outdat_list)
       outdat$tag <- rep(tags, sapply(outdat_list, nrow))
-      outdat$timestamp <- outdat$key_as_string
+      outdat$timestamp <- convert_timestamps(
+        outdat$key_as_string, cfpb_query_list$trend_interval
+      )
       outdat <- outdat[, c("tag", "timestamp", "doc_count")]
       return(outdat)
     }

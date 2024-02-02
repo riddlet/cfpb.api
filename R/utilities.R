@@ -44,3 +44,21 @@ match.call.defaults <- function(...) {
 
   match.call(sys.function(sys.parent()), call)
 }
+
+#' convert timestamps
+#'
+#' @return formatted timestamps
+convert_timestamps <- function(timestamps, trend_interval='year') {
+
+  if (trend_interval=='year') {
+    return(format(as.Date(timestamps, format="%Y-%m-%d"), '%Y'))
+  } else if (trend_interval=='quarter') {
+    return(format(as.Date(timestamps, format="%Y-%m-%d"), '%Y-%m'))
+  } else if (trend_interval=='month') {
+    return(format(as.Date(timestamps, format="%Y-%m-%d"), '%Y-%m'))
+  } else if (trend_interval=='week') {
+    return(format(as.Date(timestamps, format="%Y-%m-%d"), '%Y-%m-%d'))
+  } else {
+    return(format(as.Date(timestamps, format="%Y-%m-%d"), '%Y-%m-%d'))
+  }
+}
