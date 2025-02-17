@@ -1,5 +1,5 @@
 # cfpb.api
-A R package that allows users to query Consumer Financial Protection Bureau complaint data.
+A R package that allows users to query Consumer Financial Protection Bureau public complaint data. This repository was adapted and expanded from Rob Carnell's code here (https://github.com/bertcarnell/cfpb.api)
 
 There are five main ways to use this package:
 
